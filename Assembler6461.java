@@ -183,6 +183,25 @@ public class Assembler6461 {
         int loc = 0;
 
         for (ParsedLine pl : parsed) {
+            if (pl.op != null && pl.op.equals("LOC")) {
+                if (pl.operands.size() != 1) {
+                    throw new IllegalArgumentException("LOC expects 1 operand at line " + pl.lineNo);
+                }
+                int newLoc = parseDecimal(pl.operands.get(0), pl.lineNo);
+                if (newLoc < 0) throw new IllegalArgumentException("LOC must be >= 0 at line " + pl.lineNo);
+                loc = newLoc;
+                pl.location = loc;
+
+                // If label exists on LOC line, bind it to the new location
+                if (pl.label != null) {
+                    if (symtab.containsKey(pl.label)) {
+                        throw new IllegalArgumentException("Duplicate label '" + pl.label + "' at line " + pl.lineNo);
+                    }
+                    symtab.put(pl.label, loc);
+                }
+                continue;
+            }
+
             // If label exists, record current loc (before processing op)
             if (pl.label != null) {
                 if (symtab.containsKey(pl.label)) {
@@ -192,16 +211,6 @@ public class Assembler6461 {
             }
 
             if (pl.op == null) continue;
-
-            if (pl.op.equals("LOC")) {
-                if (pl.operands.size() != 1) {
-                    throw new IllegalArgumentException("LOC expects 1 operand at line " + pl.lineNo);
-                }
-                int newLoc = parseDecimal(pl.operands.get(0), pl.lineNo);
-                if (newLoc < 0) throw new IllegalArgumentException("LOC must be >= 0 at line " + pl.lineNo);
-                loc = newLoc;
-                continue;
-            }
 
             if (pl.generatesWord) {
                 pl.location = loc;
@@ -218,6 +227,15 @@ public class Assembler6461 {
              BufferedWriter lst = Files.newBufferedWriter(listOut)) {
 
             for (ParsedLine pl : parsed) {
+                if (pl.op != null && pl.op.equalsIgnoreCase("LOC")) {
+                    int addr = pl.location;
+                    String addrOct = fmt6(addr);
+                    String wordOct = "------";
+                    lst.write(addrOct + " " + wordOct + " " + pl.original);
+                    lst.newLine();
+                    continue;
+                }
+
                 if (!pl.generatesWord || pl.op == null) continue;
 
                 int word;
