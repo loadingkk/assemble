@@ -19,6 +19,7 @@
 - JAR file already built: *Assembler6461.jar*
 - A test input: *source.src*
 - Example List and Load outputs: *output.lst* and *output.load*
+- IntelliJ artifacts: ./.idea & ./META-INF & ./out directories
 
 **Usage**
 
@@ -31,9 +32,10 @@ java -jar Assembler6461.jar
 <p>Rebuild JAR file:</p>
 
 ```
-javac Assembler6461.java
-echo "Main-Class: Assembler6461" > manifest.txt
-jar cfm Assembler6461.jar manifest.txt Assembler6461.class
+rm -rf build
+mkdir build
+javac -d build Assembler6461.java
+jar cfe Assembler6461.jar Assembler6461 -C build .
 ```
 
 ## Part 1: Basic Machine
