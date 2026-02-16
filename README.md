@@ -1,9 +1,9 @@
 # CSCI 6461 Computer Systems Architecture Final Project
 
-- **Group 8**: Zhentao Fan and Aarifah Ullah
+- Group 8: Zhentao Fan and Aarifah Ullah
 - Prof. Morris Lancaster
 
-<p>Objective: Design a CISC computer</p>
+**Objective: Design a CISC computer**
 
 ## Part 0: Assembler
 
@@ -15,13 +15,19 @@
 
 <p>*What's included as part of submission:* <p>
 
-- Assembler source code that generates JAR file: *Assembler6461.java*
-- JAR file already built: *Assembler6461.jar*
-- A test input: *source.src*
-- Example List and Load outputs: *output.lst* and *output.load*
-- IntelliJ artifacts: ./.idea & ./META-INF & ./out directories
+- Assembler6461.java *Assembler source code that generates JAR file*
+- Assembler6461.jar *Already compiled JAR file*
+- source.src *A test input*
+- output.lst & output.load *Generated List and Load outputs*
+- IntelliJ artifacts: 
+    - ./.idea
+    - ./META-INF
+    - ./out
+    - p.iml
+    - p.jar
 
 **Usage**
+<p>The assembler expects that all input test files are called source.src and will always deliver the list and load files as output.lst and output.load respectively. The source file must be in the same path as the JAR and the list and load will appear in the same directory too.</p>
 
 <p>Run the assembler:</p>
 
