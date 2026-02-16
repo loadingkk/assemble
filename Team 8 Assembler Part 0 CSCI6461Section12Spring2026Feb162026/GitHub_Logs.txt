@@ -1,0 +1,41 @@
+commit 77483dc616e9dc25159148fc716b90af53de1673
+Author: Aarifah Ullah <Aarifah.Ullah@rtx.com>
+Date:   Sun Feb 15 22:48:40 2026 -0500
+
+    Completed Part 0: Assembler documentation
+
+commit d15e66af7c37edcbfb7499123ba003dd832d035d
+Author: Aarifah Ullah <Aarifah.Ullah@rtx.com>
+Date:   Sun Feb 15 22:32:29 2026 -0500
+
+    Finalizing documentation
+
+commit f538a560e2efdd1481b045d74b120ccc83fe321b
+Author: Aarifah Ullah <Aarifah.Ullah@rtx.com>
+Date:   Sun Feb 15 21:41:17 2026 -0500
+
+    started documentation
+
+commit 390c849412267ae7ee1f3f2a7cfc09b52422f3bd
+Author: Fan <13376562177@163.com>
+Date:   Sat Feb 7 14:52:14 2026 -0500
+
+    Build JAR
+
+commit 2c9b1d84d640e8269f783a544566c99df624ebe8
+Author: Fan <13376562177@163.com>
+Date:   Sat Feb 7 14:51:46 2026 -0500
+
+    Build JAR
+
+commit 359b990c64625d983738c65a3fe2f24ff1f12d4d
+Author: Fan <13376562177@163.com>
+Date:   Sat Feb 7 14:35:51 2026 -0500
+
+    1.1
+
+commit 7affaeffa5ffd2f35d13784f1e4ba75ef9966ec7
+Author: Fan <13376562177@163.com>
+Date:   Tue Feb 3 18:21:09 2026 -0500
+
+    1.0
