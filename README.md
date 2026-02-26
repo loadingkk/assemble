@@ -56,7 +56,7 @@ jar cfe Assembler6461.jar Assembler6461 -C build .
 
 #### Basic Machine Architecture
 
-<p> The basic machine architecture consists of the CPU, memory, and registers. Machine.java includes CPU and memory objects from CPU.java and Memory.java respectively. You can gain access to the machine using: </p>
+<p> The basic machine architecture consists of the CPU, memory, and registers. These are treated as packages and classes that get incorporated together. Machine.java includes CPU and memory objects from CPU.java and Memory.java respectively. Memory and all registers start at 0 upon initialization, You can gain access to the machine using: </p>
 
 ```
 Machine machine = new Machine();
@@ -66,18 +66,40 @@ CPU cpu = machine.cpu()
 Memory memory = machine.memory()
 Registers r = cpu.R()
 ```
+*Registers*
 
-<p>Additionally you can read and write into registers.</p>
+Implemented Registers:
+
+- GPR0–GPR3: 16-bit general purpose registers
+- IXR1–IXR3: 16-bit index registers (no X0; IX field=0 means “no indexing”)
+- PC: 12 bits (next instruction address)
+- CC: 4 bits condition codes
+- IR: 16 bits
+- MAR: 12 bits
+- MBR: 16 bits
+- MFR: 4 bits
+
+<p>Registers can be read and written to: </p>
+
+```
+short value = r.getR(0)  // get Register R0
+r.setR(2, (short) 1212); // set Register R2
+
+short xVal = r.getX(2)   // getRegister X1
+r.setPC(100);            // PC in 12-bit mask
+```
 
 #### Simple Memory
+
+<p>. Memory is word-addressable. There are 2048 words and each word size is 16-bits. There are 2 cycles for memory. In cycle 1, memory takes an address from MAR. In cycle 2, there is a data transfer, a read/write operation. Either memory reads into MBR and stores to memory[MAR] or writes from MBR and loads memory[MAR] to MBR.</p>
 
 ### Notes and Documentation
 
 <p>You can test the basic machine without the UI using SimMain.java which shows how CPU, Memory and Registers all come together to form the basic machine. </p>
 
-** Usage **
+*Usage*
 
-<p> To test the Basic Machine Architecture & Simple Memory without Load/Store & UI: </p>
+<p> To test the Basic Machine Architecture & Simple Memory without Load/Store or UI: </p>
 
 ```
 rm -rf build
@@ -86,7 +108,7 @@ javac -d build cisc/**/*.java
 java -cp build cisc.sim.SimMain
 ```
 
-<p>API</p>
+*Basic Machine & Memory API*
 
 Machine
 - resetAll()
@@ -109,6 +131,7 @@ Memory
 - peek(int addr) ---> for UI only
 - poke(int addr, short val) ----> for loader only
 
+*Note* Instruction execution must use CPU.readWord() and CPU.writeWord() instead of Memory.peek() and Memory.poke() in order to maintain the MAR/MBR timing model and 2-cycle memory properties.
 
 ## Part 2: Memory and Cache Design
 
