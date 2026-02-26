@@ -98,7 +98,7 @@ r.setPC(100);            // PC in 12-bit mask
 *What's included as part of submission:*
 
 - ./cisc/sim *Directory for UI, Machine and Memory*
-- SimMain.java *Test file for Architecture and Memory*
+- ./cisc/SimMain.java *Test file for Architecture and Memory*
 
 <p>You can test the basic machine without the UI using SimMain.java which shows how CPU, Memory and Registers all come together to form the basic machine. </p>
 
