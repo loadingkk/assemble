@@ -13,7 +13,7 @@
 
 ### Overall Design
 
-<p> The assembler takes an input source program and generates two output documents: a listing file for humans to read and any errors and a load file for the simulator. The load file contains octal addresses with the octal word per line. The assu=embler is also two-pass which separates building the symbol table and outputting machine words. Two-pass assemblers are the typical choice over one-pass assemblers.</p>
+<p> The assembler takes an input source program and generates two output documents: a listing file for humans to read and any errors and a load file for the simulator. The load file contains octal addresses with the octal word per line. The assembler is also two-pass which separates building the symbol table and outputting machine words. Two-pass assemblers are the typical choice over one-pass assemblers.</p>
 
 ### Notes and Documentation
 
@@ -94,6 +94,11 @@ r.setPC(100);            // PC in 12-bit mask
 <p>. Memory is word-addressable. There are 2048 words and each word size is 16-bits. There are 2 cycles for memory. In cycle 1, memory takes an address from MAR. In cycle 2, there is a data transfer, a read/write operation. Either memory reads into MBR and stores to memory[MAR] or writes from MBR and loads memory[MAR] to MBR.</p>
 
 ### Notes and Documentation
+
+*What's included as part of submission:*
+
+- ./cisc/sim *Directory for UI, Machine and Memory*
+- SimMain.java *Test file for Architecture and Memory*
 
 <p>You can test the basic machine without the UI using SimMain.java which shows how CPU, Memory and Registers all come together to form the basic machine. </p>
 
