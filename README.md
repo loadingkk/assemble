@@ -5,9 +5,11 @@
 
 **Objective: Design a CISC computer**
 
+<p> Repository: https://github.com/loadingkk/assemble </p>
+
 ## Part 0: Assembler
 
-Repository: https://github.com/loadingkk/assemble
+<p>The assembler is found under: ./cisc/assembler</p>
 
 ### Overall Design
 
@@ -15,7 +17,7 @@ Repository: https://github.com/loadingkk/assemble
 
 ### Notes and Documentation
 
-<p>*What's included as part of submission:* <p>
+*What's included as part of submission:*
 
 - Assembler6461.java *Assembler source code that generates JAR file*
 - Assembler6461.jar *Already compiled JAR file*
@@ -48,11 +50,65 @@ jar cfe Assembler6461.jar Assembler6461 -C build .
 
 ## Part 1: Basic Machine
 
-<p>TODO</p>
+<p>The basic machine and UI is found under: ./cisc/sim</p>
 
 ### Overall Design
 
+#### Basic Machine Architecture
+
+<p> The basic machine architecture consists of the CPU, memory, and registers. Machine.java includes CPU and memory objects from CPU.java and Memory.java respectively. You can gain access to the machine using: </p>
+
+```
+Machine machine = new Machine();
+machine.resetAll(); // Initialize memory to 0
+
+CPU cpu = machine.cpu()
+Memory memory = machine.memory()
+Registers r = cpu.R()
+```
+
+<p>Additionally you can read and write into registers.</p>
+
+#### Simple Memory
+
 ### Notes and Documentation
+
+<p>You can test the basic machine without the UI using SimMain.java which shows how CPU, Memory and Registers all come together to form the basic machine. </p>
+
+** Usage **
+
+<p> To test the Basic Machine Architecture & Simple Memory without Load/Store & UI: </p>
+
+```
+rm -rf build
+mkdir build
+javac -d build cisc/**/*.java
+java -cp build cisc.sim.SimMain
+```
+
+<p>API</p>
+
+Machine
+- resetAll()
+- cpu()
+- memory()
+
+CPU
+- fetch()
+- readWord(int addr)
+- writeWord(int addr, short value)
+- Registers R()
+
+Registers
+- getR(int r) / setR(int r, short val)
+- getX(int x) / setX(int x, short val)
+- getPC() / setPC(int val)
+- getIR(), getMAR(), getMBR(), getCC(), getMFR()
+
+Memory
+- peek(int addr) ---> for UI only
+- poke(int addr, short val) ----> for loader only
+
 
 ## Part 2: Memory and Cache Design
 
