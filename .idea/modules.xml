@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/p.iml" filepath="$PROJECT_DIR$/p.iml" />
+      <module fileurl="file://$PROJECT_DIR$/cisc/cisc.iml" filepath="$PROJECT_DIR$/cisc/cisc.iml" />
     </modules>
   </component>
 </project>

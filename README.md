@@ -98,13 +98,14 @@ r.setPC(100);            // PC in 12-bit mask
 *What's included as part of submission:*
 
 - ./cisc/sim *Directory for UI, Machine and Memory*
-- ./cisc/SimMain.java *Test file for Architecture and Memory*
+- ./cisc/sim/SimMain.java *Part I tests for architecture, EA, and Load/Store execution*
+- ./cisc/sim/SimGuiMain.java *Operator console style GUI for Part I*
 
 <p>You can test the basic machine without the UI using SimMain.java which shows how CPU, Memory and Registers all come together to form the basic machine. </p>
 
 *Usage*
 
-<p> To test the Basic Machine Architecture & Simple Memory without Load/Store or UI: </p>
+<p> To test the Basic Machine Architecture + Load/Store execution (Part I): </p>
 
 ```
 rm -rf build
@@ -112,6 +113,42 @@ mkdir build
 javac -d build cisc/**/*.java
 java -cp build cisc.sim.SimMain
 ```
+
+<p> To run the Part I GUI: </p>
+
+```
+rm -rf build
+mkdir build
+javac -d build cisc/**/*.java
+java -cp build cisc.sim.SimGuiMain
+```
+
+<p>Part I GUI usage:</p>
+
+- Start the GUI and press `IPL` to preload the short Part I demo program into memory. The demo is not loaded until `IPL` is pressed.
+- The demo program is loaded beginning at octal address `0010` and includes `LDA`, `STR`, `LDR`, `LDX`, `STX`, plus one indexed `LDR`, one indirect `LDR`, and a final `HLT`.
+- The preloaded instruction sequence is:
+  - `0010: LDA R0,0,22`
+  - `0011: STR R0,0,23`
+  - `0012: LDR R1,0,23`
+  - `0013: LDX X1,24`
+  - `0014: STX X1,25`
+  - `0015: LDR R2,1,20`
+  - `0016: LDR R3,0,30,1`
+  - `0017: HLT`
+- The right-side observation panel shows the preloaded instruction words (`Boot+0` through `Boot+7`), the key data/pointer locations used by the demo (`Data20`, `Data22`, `Data23`, `Data24`, `Data25`, `Data27`, `Ptr30`), and the current `PC` and `MAR`.
+- Press `Step` to execute one instruction at a time. Each step fetches the next instruction from `PC`, executes it, updates the register display, and prints a trace line to the `Printer` panel.
+- Press `Run` to continue stepping until `HLT` is reached or the machine is halted.
+- Press `Halt` to pause the machine immediately. Press `IPL` again to reset and reload the demo program.
+- The `MEM[MAR]` display shows the contents of the memory location currently addressed by `MAR`.
+- The `Load`, `Load+`, `Store`, and `Store+` buttons simulate front-panel register loading and storing:
+  - Select a target register by clicking its `LD` button.
+  - Enter a value in the `Octal Input` or toggle the 16-bit binary switches.
+  - `Load` copies the current front-panel word into the selected register.
+  - `Load+` does the same and then increments `MAR`.
+  - `Store` writes the selected register value to memory at `MAR`.
+  - `Store+` writes the selected register value to memory at `MAR` and then increments `MAR`.
+- `Program File` is currently a placeholder input field for later file-loading work; Part I uses the built-in IPL demo program instead.
 
 *Basic Machine & Memory API*
 
@@ -124,6 +161,10 @@ CPU
 - fetch()
 - readWord(int addr)
 - writeWord(int addr, short value)
+- computeEA(int ix, int iBit, int addr5)
+- executeLoadStoreStep()
+- isHalted()
+- halt()
 - Registers R()
 
 Registers
