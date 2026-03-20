@@ -1,0 +1,22 @@
+; Program 1 (Part 2 deliverable, source-only for this stage)
+; Team integration note:
+; - This program is intentionally prepared before full instruction execution is merged.
+; - It depends on execution support for IN / OUT / CHK / JZ / JMA.
+; - After instruction integration, run and tune behavior as needed.
+;
+; Behavior goal (current draft):
+; 1) Poll keyboard status (device 0)
+; 2) Read one word from keyboard (device 0)
+; 3) Print that word to printer (device 1)
+; 4) Repeat forever
+;
+; Operand style follows current assembler implementation.
+
+        LOC     16
+
+START:  CHK     1,0         ; R1 <- keyboard ready status (device 0)
+        JZ      1,0,START   ; if not ready, keep polling
+        IN      0,0         ; R0 <- keyboard input
+        OUT     0,1         ; print R0 to printer device
+        JMA     1,START     ; loop (assembler currently requires x=1..3 for JMA)
+        HLT                 ; safety stop (normally unreachable)

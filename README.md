@@ -181,11 +181,48 @@ Memory
 
 ## Part 2: Memory and Cache Design
 
-<p>TODO</p>
+<p>Part 2 work in this repository currently focuses on: (1) Program 1 source delivery and (2) UI extension delivery that does not require full instruction execution integration yet.</p>
 
 ### Overall Design
 
+#### Program 1 (Source Delivery for Current Stage)
+
+- Program 1 source file path: `./programs/part2/program1/source.src`
+- Current stage objective: deliver a clean source program and usage notes while instruction execution work is still owned by another teammate.
+- Current Program 1 draft behavior:
+  - Poll keyboard status with `CHK`
+  - Read keyboard input with `IN`
+  - Print to console/printer with `OUT`
+  - Loop with `JMA`
+- Important integration note:
+  - Program 1 depends on CPU execution support for `IN/OUT/CHK/JZ/JMA`.
+  - If these instructions are not yet merged into simulator execution, Program 1 is expected to be source-only and not fully runnable at this stage.
+
+#### UI Extension (Part 2 Front-End + Integration Hooks)
+
+`SimGuiMain` is extended for Part 2 delivery in a way that can be demonstrated now and connected to full execution later:
+
+- Program file panel:
+  - Added real `.load` file loader.
+  - Loads octal `<address word>` entries into memory.
+  - Sets `PC` to first loaded address.
+- Console input panel:
+  - Added queue-backed input flow (`Send` / `Consume`).
+  - Shows queue size and head item.
+  - Serves as an integration hook for future `IN/CHK` device behavior.
+- Printer panel:
+  - Added `Clear` action for operator workflow.
+- Cache content panel:
+  - Updated to show UI-level access history and simple hit/miss stats placeholder.
+  - This is a front-end bridge and will later connect to real cache internals once memory/cache execution integration is finalized.
+
 ### Notes and Documentation
+
+- Part 2 UI implementation file: `./cisc/sim/SimGuiMain.java`
+- Program 1 source file: `./programs/part2/program1/source.src`
+- Integration boundary for current stage:
+  - CPU instruction execution logic remains separate and is intentionally not expanded by this Part 2 UI/program-source delivery.
+  - After instruction merge, Program 1 and UI hooks should be validated end-to-end and adjusted as needed.
 
 ## Part 3: Execute all Instructions
 
