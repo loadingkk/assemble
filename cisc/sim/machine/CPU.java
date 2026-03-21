@@ -2,6 +2,7 @@ package cisc.sim.machine;
 
 import cisc.sim.memory.Memory;
 import cisc.sim.memory.MemoryFault;
+import cisc.sim.cache.Cache;
 
 public class CPU {
     private static final int OP_HLT = 0;
@@ -10,15 +11,20 @@ public class CPU {
     private static final int OP_LDA = 3;
     private static final int OP_LDX = 041;
     private static final int OP_STX = 042;
+    private static final int OP_AMR = 4;
+    private static final int OP_AIR = 6;
+
 
     private static final int MFR_ILLEGAL_OPCODE = 0b0100;
 
     private final Registers regs = new Registers();
     private final Memory memory;
+    private final Cache cache;
     private boolean halted = false;
 
     public CPU(Memory memory) {
         this.memory = memory;
+        this.cache = new Cache(memory);
     }
 
     public Registers R() { return regs; }
@@ -43,7 +49,6 @@ public class CPU {
         regs.setPC(regs.getPC() + 1);
     }
 
-    // Helpers your teammate will use in execute stage:
     public short readWord(int addr) throws MemoryFault {
         regs.setMAR(addr);
         memory.cycle1_setAddress(regs.getMAR(), false);
@@ -95,14 +100,14 @@ public class CPU {
             }
             case OP_LDR -> {
                 int ea = computeEA(ix, iBit, addr5);
-                short value = readWord(ea);
+                short value = cache.read(ea);
                 regs.setR(r, value);
                 yield String.format("LDR R%d <- M[%04o] (%06o)", r, ea, value & 0xFFFF);
             }
             case OP_STR -> {
                 int ea = computeEA(ix, iBit, addr5);
                 short value = regs.getR(r);
-                writeWord(ea, value);
+                cache.write(ea, value);
                 yield String.format("STR M[%04o] <- R%d (%06o)", ea, r, value & 0xFFFF);
             }
             case OP_LDA -> {
@@ -117,7 +122,7 @@ public class CPU {
                     yield "LDX invalid IX=0";
                 }
                 int ea = computeEAForXOp(iBit, addr5);
-                short value = readWord(ea);
+                short value = cache.read(ea);
                 regs.setX(ix, value);
                 yield String.format("LDX X%d <- M[%04o] (%06o)", ix, ea, value & 0xFFFF);
             }
@@ -131,6 +136,13 @@ public class CPU {
                 short value = regs.getX(ix);
                 writeWord(ea, value);
                 yield String.format("STX M[%04o] <- X%d (%06o)", ea, ix, value & 0xFFFF);
+            }
+            case OP_AMR -> {
+                int ea = computeEA(ix, iBit, addr5);
+                short memVal = cache.read(ea);
+                short result = (short) (regs.getR(r) + memVal);
+                regs.setR(r, result);
+                yield String.format("AMR R%d <- R%d + M[%04o] = %06o", r, r, ea, result & 0xFFFF);
             }
             default -> {
                 regs.setMFR(MFR_ILLEGAL_OPCODE);
