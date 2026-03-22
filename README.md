@@ -185,6 +185,35 @@ Memory
 
 ### Overall Design
 
+<p>The CPU now uses cache insted of direct memory. Cache is implemented under Cache.java. Also, readWord() and writeWord() operations from Memory.java are still kept as failsafes. The CPU also has all instructions except for TRAP and Floating Point. Operations include arithmetic, logic, rotating, and load/store instructions. The complete list of operations are: </p>
+
+- HLT
+- LDR
+- STR 
+- LDA
+- LDX
+- STX
+- AMR
+- SMR
+- AIR
+- SIR
+- JZ
+- JNE
+- JCC
+- JMA
+- JSR
+- RFS
+- SOB
+- JGE
+- MLT
+- DVD
+- TRR
+- AND
+- ORR
+- NOT
+- SRC
+- RRC
+
 #### Program 1 (Source Delivery for Current Stage)
 
 - Program 1 source file path: `./programs/part2/program1/source.src`
