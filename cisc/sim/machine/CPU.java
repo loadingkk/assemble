@@ -5,19 +5,42 @@ import cisc.sim.memory.MemoryFault;
 import cisc.sim.cache.Cache;
 
 public class CPU {
-    private static final int OP_HLT = 0;
+    private static final int OP_HLT = 0; // Stops machine
+
+    // Load/Store
     private static final int OP_LDR = 1;
     private static final int OP_STR = 2;
     private static final int OP_LDA = 3;
     private static final int OP_LDX = 041;
     private static final int OP_STX = 042;
-    private static final int OP_AMR = 4;
-    private static final int OP_AIR = 6;
-    private static final int OP_NOT = 21;
-    private static final int OP_AND = 17;
-    private static final int OP_JZ = 10;
-    private static final int OP_JMA = 13;
-    private static final int OP_SOB = 16;
+
+    // Arithmetic
+    private static final int OP_AMR = 04;
+    private static final int OP_SMR = 05;
+    private static final int OP_AIR = 06;
+    private static final int OP_SIR = 07;
+
+    // Transfer
+    private static final int OP_JZ = 010;
+    private static final int OP_JNE = 011;
+    private static final int OP_JCC = 012;
+    private static final int OP_JMA = 013;
+    private static final int OP_JSR = 014;
+    private static final int OP_RFS = 015;
+    private static final int OP_SOB = 016;
+    private static final int OP_JGE = 017;
+
+    // Register ops
+    private static final int OP_MLT = 070;
+    private static final int OP_DVD = 071;
+    private static final int OP_TRR = 072;
+    private static final int OP_AND = 073;
+    private static final int OP_ORR = 074;
+    private static final int OP_NOT = 075;
+
+    // Shift/Rotate
+    private static final int OP_SRC = 031;
+    private static final int OP_RRC = 032;
 
     private static final int MFR_ILLEGAL_OPCODE = 0b0100;
 
@@ -106,27 +129,34 @@ public class CPU {
         int addr5 = ir & 0x1F;
 
         return switch (opcode) {
+
             case OP_HLT -> {
                 halted = true;
                 yield "HLT";
             }
+
+            // =====================
+            // LOAD/STORE (USE CACHE)
+            // =====================
             case OP_LDR -> {
                 int ea = computeEA(ix, iBit, addr5);
                 short value = cache.read(ea);
                 regs.setR(r, value);
-                yield String.format("LDR R%d <- M[%04o] (%06o)", r, ea, value & 0xFFFF);
+                yield "LDR";
             }
+
             case OP_STR -> {
                 int ea = computeEA(ix, iBit, addr5);
-                short value = regs.getR(r);
-                cache.write(ea, value);
-                yield String.format("STR M[%04o] <- R%d (%06o)", ea, r, value & 0xFFFF);
+                cache.write(ea, regs.getR(r));
+                yield "STR";
             }
+
             case OP_LDA -> {
                 int ea = computeEA(ix, iBit, addr5);
-                regs.setR(r, (short) (ea & 0xFFFF));
-                yield String.format("LDA R%d <- EA(%04o)", r, ea);
+                regs.setR(r, (short) ea);
+                yield "LDA";
             }
+
             case OP_LDX -> {
                 if (ix == 0) {
                     regs.setMFR(MFR_ILLEGAL_OPCODE);
@@ -136,7 +166,7 @@ public class CPU {
                 int ea = computeEAForXOp(iBit, addr5);
                 short value = cache.read(ea);
                 regs.setX(ix, value);
-                yield String.format("LDX X%d <- M[%04o] (%06o)", ix, ea, value & 0xFFFF);
+                yield "LDX";
             }
             case OP_STX -> {
                 if (ix == 0) {
@@ -147,64 +177,218 @@ public class CPU {
                 int ea = computeEAForXOp(iBit, addr5);
                 short value = regs.getX(ix);
                 writeWord(ea, value);
-                yield String.format("STX M[%04o] <- X%d (%06o)", ea, ix, value & 0xFFFF);
+                yield "STX";
             }
+
+            // =====================
+            // ARITHMETIC
+            // =====================
             case OP_AMR -> {
                 int ea = computeEA(ix, iBit, addr5);
-                short memVal = cache.read(ea);
-                short result = (short) (regs.getR(r) + memVal);
-                regs.setR(r, result);
-                yield String.format("AMR R%d <- R%d + M[%04o] = %06o", r, r, ea, result & 0xFFFF);
+                short res = (short) (regs.getR(r) + cache.read(ea));
+                regs.setR(r, res);
+                yield "AMR";
             }
-            case OP_NOT -> {
-                regs.setR(r, (short) (~regs.getR(r)));
-                yield "NOT";
-            }
-            case OP_AND -> {
+
+            case OP_SMR -> {
                 int ea = computeEA(ix, iBit, addr5);
-                short memVal = cache.read(ea);
-                short result = (short) (regs.getR(r) & memVal);
-                regs.setR(r, result);
-                yield "AND";
+                short res = (short) (regs.getR(r) - cache.read(ea));
+                regs.setR(r, res);
+                yield "SMR";
             }
 
             case OP_AIR -> {
-                short result = (short) (regs.getR(r) + addr5);
-                regs.setR(r, result);
+                regs.setR(r, (short) (regs.getR(r) + addr5));
                 yield "AIR";
             }
 
+            case OP_SIR -> {
+                regs.setR(r, (short) (regs.getR(r) - addr5));
+                yield "SIR";
+            }
+
+            // =====================
+            // TRANSFER
+            // =====================
             case OP_JZ -> {
                 if (regs.getR(r) == 0) {
-                    int ea = computeEA(ix, iBit, addr5);
-                    regs.setPC(ea);
+                    regs.setPC(computeEA(ix, iBit, addr5));
                 }
                 yield "JZ";
             }
 
+            case OP_JNE -> {
+                if (regs.getR(r) != 0) {
+                    regs.setPC(computeEA(ix, iBit, addr5));
+                }
+                yield "JNE";
+            }
+
+            case OP_JCC -> {
+                int cc = r; // cc replaces r
+                if ((regs.getCC() & (1 << cc)) != 0) {
+                    regs.setPC(computeEA(ix, iBit, addr5));
+                }
+                yield "JCC";
+            }
+
             case OP_JMA -> {
-                int ea = computeEA(ix, iBit, addr5);
-                regs.setPC(ea);
+                regs.setPC(computeEA(ix, iBit, addr5));
                 yield "JMA";
+            }
+
+            case OP_JSR -> {
+                regs.setR(3, (short) regs.getPC()); // save return
+                regs.setPC(computeEA(ix, iBit, addr5));
+                yield "JSR";
+            }
+
+            case OP_RFS -> {
+                regs.setR(0, (short) addr5); // return code
+                regs.setPC(regs.getR(3));
+                yield "RFS";
             }
 
             case OP_SOB -> {
                 short val = (short) (regs.getR(r) - 1);
                 regs.setR(r, val);
-
                 if (val > 0) {
-                    int ea = computeEA(ix, iBit, addr5);
-                    regs.setPC(ea);
+                    regs.setPC(computeEA(ix, iBit, addr5));
                 }
-
                 yield "SOB";
             }
+
+            case OP_JGE -> {
+                if (regs.getR(r) >= 0) {
+                    regs.setPC(computeEA(ix, iBit, addr5));
+                }
+                yield "JGE";
+            }
+
+            // =====================
+            // REGISTER OPS
+            // =====================
+            case OP_MLT -> {
+                int rx = r;
+                int ry = ix;
+
+                long result = (long) regs.getR(rx) * (long) regs.getR(ry);
+
+                regs.setR(rx, (short) ((result >> 16) & 0xFFFF));
+                regs.setR(rx + 1, (short) (result & 0xFFFF));
+
+                yield "MLT";
+            }
+
+            case OP_DVD -> {
+                int rx = r;
+                int ry = ix;
+
+                short divisor = regs.getR(ry);
+
+                if (divisor == 0) {
+                    regs.setCC(regs.getCC() | (1 << 3)); // DIVZERO
+                    yield "DVD DIVZERO";
+                }
+
+                short quotient = (short) (regs.getR(rx) / divisor);
+                short remainder = (short) (regs.getR(rx) % divisor);
+
+                regs.setR(rx, quotient);
+                regs.setR(rx + 1, remainder);
+
+                yield "DVD";
+            }
+
+            case OP_TRR -> {
+                int rx = r;
+                int ry = ix;
+
+                if (regs.getR(rx) == regs.getR(ry)) {
+                    regs.setCC(regs.getCC() | (1 << 2));
+                }
+                yield "TRR";
+            }
+
+            case OP_AND -> {
+                int rx = r;
+                int ry = ix;
+                regs.setR(rx, (short) (regs.getR(rx) & regs.getR(ry)));
+                yield "AND";
+            }
+
+            case OP_ORR -> {
+                int rx = r;
+                int ry = ix;
+                regs.setR(rx, (short) (regs.getR(rx) | regs.getR(ry)));
+                yield "ORR";
+            }
+
+            case OP_NOT -> {
+                regs.setR(r, (short) (~regs.getR(r)));
+                yield "NOT";
+            }
+
+            case OP_SRC -> {
+                int count = ir & 0xF;
+                int lr = (ir >> 4) & 0x1; // 1 = left, 0 = right
+                int al = (ir >> 5) & 0x1; // 1 = logical, 0 = arithmetic
+
+                if (count == 0)
+                    yield "SRC (no-op)";
+
+                int val = regs.getR(r) & 0xFFFF;
+
+                for (int i = 0; i < count; i++) {
+                    if (lr == 1) {
+                        // LEFT SHIFT (same for logical & arithmetic)
+                        val = (val << 1) & 0xFFFF;
+                    } else {
+                        // RIGHT SHIFT
+                        if (al == 1) {
+                            // LOGICAL → fill with 0
+                            val = (val >>> 1);
+                        } else {
+                            // ARITHMETIC → preserve sign
+                            val = (val >> 1);
+                        }
+                    }
+                }
+
+                regs.setR(r, (short) val);
+                yield "SRC";
+            }
+
+            case OP_RRC -> {
+                int count = ir & 0xF;
+                int lr = (ir >> 4) & 0x1; // 1 = left, 0 = right
+
+                if (count == 0)
+                    yield "RRC (no-op)";
+
+                int val = regs.getR(r) & 0xFFFF;
+
+                for (int i = 0; i < count; i++) {
+                    if (lr == 1) {
+                        // ROTATE LEFT
+                        val = ((val << 1) | (val >>> 15)) & 0xFFFF;
+                    } else {
+                        // ROTATE RIGHT
+                        val = ((val >>> 1) | (val << 15)) & 0xFFFF;
+                    }
+                }
+
+                regs.setR(r, (short) val);
+                yield "RRC";
+            }
+
             default -> {
                 regs.setMFR(MFR_ILLEGAL_OPCODE);
                 halted = true;
-                yield String.format("Illegal opcode %02o", opcode);
+                yield "Illegal opcode";
             }
         };
+
     }
 
     // LDX/STX use X field as destination/source register id, not as EA index.
