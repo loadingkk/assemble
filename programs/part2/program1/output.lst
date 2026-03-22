@@ -1,0 +1,46 @@
+000000 ------         LOC     0
+000000 102137         LDX     1,31        ; X1 <- DATA_BASE
+000001 003106         LDR     2,1,6       ; R2 <- 20 (input count)
+000002 002112         LDR     0,1,10      ; R0 <- 32767 (initial best diff)
+000003 004103         STR     0,1,3       ; BEST_DIFF <- 32767
+000004 147400 WTGT:   CHK     3,0
+000005 021404         JZ      3,0,WTGT
+000006 142400         IN      1,0         ; R1 <- target
+000007 004501         STR     1,1,1       ; TARGET <- R1
+000010 147400 LOOP:   CHK     3,0
+000011 021410         JZ      3,0,LOOP
+000012 142000         IN      0,0         ; R0 <- current input
+000013 144001         OUT     0,1         ; echo to printer
+000014 004104         STR     0,1,4       ; CUR <- R0
+000015 012101         SMR     0,1,1       ; R0 <- CUR - TARGET
+000016 036021         JGE     0,0,ABSOK
+000017 172000         NOT     0
+000020 014001         AIR     0,1         ; abs(CUR - TARGET)
+000021 004105 ABSOK:  STR     0,1,5       ; CUR_ABS <- abs diff
+000022 012103         SMR     0,1,3       ; R0 <- CUR_ABS - BEST_DIFF
+000023 036030         JGE     0,0,NUPD    ; if >= 0, not better
+000024 002104         LDR     0,1,4
+000025 004102         STR     0,1,2       ; BEST_VAL <- CUR
+000026 002105         LDR     0,1,5
+000027 004103         STR     0,1,3       ; BEST_DIFF <- CUR_ABS
+000030 017001 NUPD:   SIR     2,1
+000031 023010         JNE     2,0,LOOP
+000032 002101         LDR     0,1,1
+000033 144001         OUT     0,1         ; print TARGET
+000034 002102         LDR     0,1,2
+000035 144001         OUT     0,1         ; print BEST_VAL
+000036 000000         HLT
+000037 ------         LOC     31
+000037 000100         Data    64          ; DATA_BASE
+000100 ------         LOC     64
+000100 000000         Data    0           ; +0  RESERVED
+000101 000000         Data    0           ; +1  TARGET
+000102 000000         Data    0           ; +2  BEST_VAL
+000103 000000         Data    0           ; +3  BEST_DIFF
+000104 000000         Data    0           ; +4  CUR
+000105 000000         Data    0           ; +5  CUR_ABS
+000106 000024         Data    20          ; +6  COUNT_20
+000107 000000         Data    0           ; +7  RESERVED
+000110 000000         Data    0           ; +8  RESERVED
+000111 000000         Data    0           ; +9  RESERVED
+000112 077777         Data    32767       ; +10 MAX_DIFF_INIT
