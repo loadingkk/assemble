@@ -13,7 +13,11 @@ public class CPU {
     private static final int OP_STX = 042;
     private static final int OP_AMR = 4;
     private static final int OP_AIR = 6;
-
+    private static final int OP_NOT = 21;
+    private static final int OP_AND = 17;
+    private static final int OP_JZ = 10;
+    private static final int OP_JMA = 13;
+    private static final int OP_SOB = 16;
 
     private static final int MFR_ILLEGAL_OPCODE = 0b0100;
 
@@ -27,9 +31,17 @@ public class CPU {
         this.cache = new Cache(memory);
     }
 
-    public Registers R() { return regs; }
-    public boolean isHalted() { return halted; }
-    public void halt() { halted = true; }
+    public Registers R() {
+        return regs;
+    }
+
+    public boolean isHalted() {
+        return halted;
+    }
+
+    public void halt() {
+        halted = true;
+    }
 
     public void reset() {
         regs.reset();
@@ -143,6 +155,49 @@ public class CPU {
                 short result = (short) (regs.getR(r) + memVal);
                 regs.setR(r, result);
                 yield String.format("AMR R%d <- R%d + M[%04o] = %06o", r, r, ea, result & 0xFFFF);
+            }
+            case OP_NOT -> {
+                regs.setR(r, (short) (~regs.getR(r)));
+                yield "NOT";
+            }
+            case OP_AND -> {
+                int ea = computeEA(ix, iBit, addr5);
+                short memVal = cache.read(ea);
+                short result = (short) (regs.getR(r) & memVal);
+                regs.setR(r, result);
+                yield "AND";
+            }
+
+            case OP_AIR -> {
+                short result = (short) (regs.getR(r) + addr5);
+                regs.setR(r, result);
+                yield "AIR";
+            }
+
+            case OP_JZ -> {
+                if (regs.getR(r) == 0) {
+                    int ea = computeEA(ix, iBit, addr5);
+                    regs.setPC(ea);
+                }
+                yield "JZ";
+            }
+
+            case OP_JMA -> {
+                int ea = computeEA(ix, iBit, addr5);
+                regs.setPC(ea);
+                yield "JMA";
+            }
+
+            case OP_SOB -> {
+                short val = (short) (regs.getR(r) - 1);
+                regs.setR(r, val);
+
+                if (val > 0) {
+                    int ea = computeEA(ix, iBit, addr5);
+                    regs.setPC(ea);
+                }
+
+                yield "SOB";
             }
             default -> {
                 regs.setMFR(MFR_ILLEGAL_OPCODE);
