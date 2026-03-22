@@ -1,0 +1,20 @@
+# macOS
+.DS_Store
+
+# IntelliJ
+.idea/
+*.iml
+
+# Java build outputs
+build/
+build-*/
+out/
+*.class
+
+# Logs and temp files
+*.log
+*.tmp
+
+# OS/editor temp
+*.swp
+*~
