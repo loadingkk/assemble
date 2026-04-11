@@ -50,7 +50,11 @@ public class CPU {
     private static final int OP_OUT = 062;
     private static final int OP_CHK = 063;
 
-    private static final int MFR_ILLEGAL_OPCODE = 0b0100;
+    private static final int MFR_RESERVED_ADDRESS = 0b0001; // Illegal memory address to reserved locations
+    private static final int MFR_ILLEGAL_TRAP = 0b0010; // Illegal TRAP code
+    private static final int MFR_ILLEGAL_OPCODE = 0b0100; // Illegal operation code
+    private static final int MFR_MEMORY_OVERFLOW = 0b1000; // Illegal memory address beyond memory installed
+
     private static final int DEV_KEYBOARD = 0;
     private static final int DEV_PRINTER = 1;
 
@@ -175,7 +179,7 @@ public class CPU {
                     int trapCode = addr5;
 
                     if (trapCode < 0 || trapCode > 15) {
-                        triggerMachineFault(MFR_ILLEGAL_OPCODE, "Invalid TRAP code: " + trapCode);
+                        triggerMachineFault(MFR_ILLEGAL_TRAP, "Invalid TRAP code: " + trapCode);
                         yield "FAULT";
                     }
 
@@ -449,7 +453,7 @@ public class CPU {
 
         } 
         catch (MemoryFault mf) {
-            triggerMachineFault(MFR_ILLEGAL_OPCODE, "Memory fault: " + mf.getMessage());
+            triggerMachineFault(MFR_MEMORY_OVERFLOW, "Memory address beyond memory installed: " + mf.getMessage());
             return "FAULT";
         }
 
