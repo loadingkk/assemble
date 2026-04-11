@@ -83,19 +83,20 @@ public class CPU {
     }
 
     private void triggerMachineFault(int faultCode, String message) {
-        int faultHandlerAddr = 1;
+        regs.setMFR(faultCode);
 
         // Load handler address from memory
         try{
+            int faultHandlerAddr = 1;
             int newPC = cache.read(faultHandlerAddr) & 0xFFF;
             regs.setPC(newPC);
         }
         catch (MemoryFault mf) {
             // If we can't read the fault handler address, we have no choice but to halt.
-            System.out.println("Machine fault during fault handling: " + mf.getMessage());
-            regs.setMFR(faultCode);
             halted = true;
         }
+
+        System.out.println("Machine fault during fault handling");
     }
 
     public void reset() {
@@ -137,6 +138,12 @@ public class CPU {
     }
 
     public void writeWord(int addr, short value) throws MemoryFault {
+
+        if(addr == 0 || addr == 1) {
+            triggerMachineFault(MFR_RESERVED_ADDRESS, "Attempt to write to reserved memory address: " + addr);
+            return;
+        }
+
         regs.setMAR(addr);
         regs.setMBR(value);
         cache.write(regs.getMAR(), regs.getMBR());
