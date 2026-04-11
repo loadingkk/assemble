@@ -270,9 +270,16 @@ Part 2 now includes a cache layer and GUI integration:
 
 ## Part 3: Execute all Instructions
 
-<p>TODO</p>
+<p>In part III, we primarily handle improper opcodes through the Machine Fault Register (MFR) and implement CHK, TRAPs, and HALTs. We also implement our second program.</p>
 
 ### Overall Design
+
+<p>We do not use all of the instructions and opcodes, given that there are 64 possible values in our machine. For invalid opcdes not defined in the specifications (Load/Stores, Arithmetic, Logic, etc.), we need to handle them properly instead of just letting the machine continue arbitrary execution. Therefore, our machine throws a fault. We did not implement interrupts since it was not in the scope of the project, but there were placeholders for potential; these were HALTs.<br>
+
+Part III was where the complexity of the project really shined since we are considering error-handling and guiding user execution into proper and improper usage. The MFR register was also really important. There were four possible machine faults: illegal memory address to reserver locations, illegal trap code, illegal operation code, and illegal memory address beyond the memory installed. The MFR register was set to different binary values to indicate wach one and then the machine was halted. We also initialized memory to have the saved PC to be at location 1 after trap or machine fault. Location 1 pointed to location 6 which was a HALT. It could be other values, but was fine to demonstrate the fault. <br>
+
+Extensive error-handling can be seen in CPU.java where it checks whether the opcode is only in the defined list, that writes are not allowed for reserved memory (that for TRAPs), and memory initialization to name a few. Try/catch blocks were also used and the errors were machine faults and optionally followed by setting the MFR register to the four possible values when possible.
+</p>
 
 ### Notes and Documentation
 
