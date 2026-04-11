@@ -9,6 +9,7 @@ import java.util.Deque;
 
 public class CPU {
     private static final int OP_HLT = 0; // Stops machine
+    private static final int OP_TRAP = 030;
 
     // Load/Store
     private static final int OP_LDR = 1;
@@ -77,12 +78,31 @@ public class CPU {
         halted = true;
     }
 
+    private void triggerMachineFault(int faultCode, String message) {
+        regs.setMFR(faultCode);
+        halted = true;
+        System.out.println("Machine fault: " + message);
+    }
+
     public void reset() {
         regs.reset();
         cache.reset();
         keyboardQueue.clear();
         printerOutput.setLength(0);
         halted = false;
+    }
+
+    private boolean isValidOpcode(int opcode) {
+        return switch(opcode) {
+            case OP_HLT, OP_LDR, OP_STR, OP_LDA, OP_LDX, OP_STX,
+                 OP_AMR, OP_SMR, OP_AIR, OP_SIR,
+                 OP_JZ, OP_JNE, OP_JCC, OP_JMA, OP_JSR, OP_RFS, OP_SOB, OP_JGE,
+                 OP_MLT, OP_DVD, OP_TRR, OP_AND, OP_ORR, OP_NOT,
+                 OP_SRC, OP_RRC,
+                 OP_IN, OP_OUT, OP_CHK,
+                 OP_TRAP -> true;
+            default -> false;
+        };
     }
 
     /** Fetch next instruction: MAR <- PC; MBR <- mem[MAR]; IR <- MBR; PC++ */
@@ -137,11 +157,28 @@ public class CPU {
         int iBit = (ir >>> 5) & 0x1;
         int addr5 = ir & 0x1F;
 
+        if (!isValidOpcode(opcode)) {
+            triggerMachineFault(MFR_ILLEGAL_OPCODE, "Invalid opcode: " + opcode);
+            return "FAULT";
+        }
+
         return switch (opcode) {
 
             case OP_HLT -> {
                 halted = true;
                 yield "HLT";
+            }
+
+            case OP_TRAP -> {
+                int trapCode = addr5;
+
+                if (trapCode < 0 || trapCode > 15) {
+                    triggerMachineFault(MFR_ILLEGAL_OPCODE, "Invalid TRAP code: " + trapCode);
+                    yield "TRAP invalid code";
+                }
+
+                System.out.println("TRAP executed with code: " + trapCode); // No interrupts
+                yield "TRAP";
             }
 
             // =====================
@@ -168,8 +205,7 @@ public class CPU {
 
             case OP_LDX -> {
                 if (ix == 0) {
-                    regs.setMFR(MFR_ILLEGAL_OPCODE);
-                    halted = true;
+                    triggerMachineFault(MFR_ILLEGAL_OPCODE, "Invalid LDX IX=0");
                     yield "LDX invalid IX=0";
                 }
                 int ea = computeEAForXOp(iBit, addr5);
@@ -179,8 +215,7 @@ public class CPU {
             }
             case OP_STX -> {
                 if (ix == 0) {
-                    regs.setMFR(MFR_ILLEGAL_OPCODE);
-                    halted = true;
+                    triggerMachineFault(MFR_ILLEGAL_OPCODE, "Invalid STX IX=0");
                     yield "STX invalid IX=0";
                 }
                 int ea = computeEAForXOp(iBit, addr5);
@@ -404,8 +439,7 @@ public class CPU {
             }
 
             default -> {
-                regs.setMFR(MFR_ILLEGAL_OPCODE);
-                halted = true;
+                triggerMachineFault(MFR_ILLEGAL_OPCODE, "Illegal opcode: " + opcode);
                 yield "Illegal opcode";
             }
         };
