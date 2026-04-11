@@ -68,6 +68,18 @@ public class CPU {
     public CPU(Memory memory) {
         this.memory = memory;
         this.cache = new Cache(memory);
+
+        try{
+            // Machine fault handler pointer
+            memory.poke(1, (short) 6); // point to address 0 for now
+
+            // At location 6: HLT instruction
+            memory.poke(6, (short) (OP_HLT << 10)); // HLT
+        }
+
+        catch (MemoryFault mf) {
+            System.out.println("Unexpected memory fault during CPU initialization: " + mf.getMessage());
+        }
     }
 
     public Registers R() {
