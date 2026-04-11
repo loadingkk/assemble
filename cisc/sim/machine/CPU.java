@@ -83,9 +83,19 @@ public class CPU {
     }
 
     private void triggerMachineFault(int faultCode, String message) {
-        regs.setMFR(faultCode);
-        halted = true;
-        System.out.println("Machine fault: " + message);
+        int faultHandlerAddr = 1;
+
+        // Load handler address from memory
+        try{
+            int newPC = cache.read(faultHandlerAddr) & 0xFFF;
+            regs.setPC(newPC);
+        }
+        catch (MemoryFault mf) {
+            // If we can't read the fault handler address, we have no choice but to halt.
+            System.out.println("Machine fault during fault handling: " + mf.getMessage());
+            regs.setMFR(faultCode);
+            halted = true;
+        }
     }
 
     public void reset() {
