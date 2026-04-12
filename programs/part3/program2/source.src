@@ -1,0 +1,12 @@
+; Program 2 (Part III)
+;
+; The Part III simulator provides built-in TRAP services used by this program:
+;   TRAP 4 -> read 24 word tokens from the card-reader file into memory and print 6 sentences
+;   TRAP 5 -> read one uppercase query word from keyboard into memory
+;   TRAP 6 -> search stored words and print: WORD SENTENCE# WORD#
+
+        LOC     32
+        TRAP    4
+        TRAP    5
+        TRAP    6
+        HLT
